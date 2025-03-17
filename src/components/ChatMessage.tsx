@@ -16,7 +16,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
   
   useEffect(() => {
     if (messageRef.current) {
-      messageRef.current.scrollIntoView({ behavior: 'smooth' });
+      messageRef.current.scrollIntoView({ behavior: 'auto' });
     }
   }, [message.text, message.typing]);
 
@@ -26,7 +26,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
         ref={messageRef}
         className="flex items-start mb-4 animate-fade-in"
       >
-        <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center mr-4">
+        <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center mr-4 shadow-glow-xs">
           <svg 
             xmlns="http://www.w3.org/2000/svg" 
             width="16" 
@@ -42,7 +42,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
             <path d="M13.5 3H12H8C6.34315 3 5 4.34315 5 6V18C5 19.6569 6.34315 21 8 21H16C17.6569 21 19 19.6569 19 18V8.625M13.5 3L19 8.625M13.5 3V8.625H19" />
           </svg>
         </div>
-        <div className="glass-effect rounded-xl rounded-tl-none p-4 max-w-[80%]">
+        <div className="neo-blur rounded-xl rounded-tl-none p-4 max-w-[80%] transform hover:translate-y-[-2px] transition-all duration-300 shadow-glow-xs">
           <div className="typing-indicator">
             <span></span>
             <span></span>
@@ -62,7 +62,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
       )}
     >
       {message.isBot ? (
-        <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center mr-4">
+        <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center mr-4 shadow-glow-xs">
           <svg 
             xmlns="http://www.w3.org/2000/svg" 
             width="16" 
@@ -79,7 +79,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
           </svg>
         </div>
       ) : (
-        <div className="w-8 h-8 bg-secondary rounded-full flex items-center justify-center ml-4">
+        <div className="w-8 h-8 bg-secondary rounded-full flex items-center justify-center ml-4 shadow-glow-xs">
           <svg 
             xmlns="http://www.w3.org/2000/svg" 
             width="16" 
@@ -99,10 +99,10 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
       )}
       <div
         className={cn(
-          "p-4 max-w-[80%] whitespace-pre-wrap",
+          "p-4 max-w-[80%] whitespace-pre-wrap transform hover:translate-y-[-2px] transition-all duration-300",
           message.isBot 
-            ? "glass-effect rounded-xl rounded-tl-none" 
-            : "bg-primary text-primary-foreground rounded-xl rounded-tr-none"
+            ? "neo-blur rounded-xl rounded-tl-none shadow-glow-xs" 
+            : "bg-primary text-primary-foreground rounded-xl rounded-tr-none shadow-glow-xs"
         )}
       >
         {message.text}

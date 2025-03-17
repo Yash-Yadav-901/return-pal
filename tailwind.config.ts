@@ -19,6 +19,9 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				orbitron: ['Orbitron', 'sans-serif']
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -105,6 +108,10 @@ export default {
 				'typing': {
 					'0%': { width: '0%' },
 					'100%': { width: '100%' }
+				},
+				'rotate-cube': {
+					'0%': { transform: 'rotateX(0) rotateY(0)' },
+					'100%': { transform: 'rotateX(360deg) rotateY(360deg)' }
 				}
 			},
 			animation: {
@@ -116,7 +123,8 @@ export default {
 				'slide-down': 'slide-down 0.4s ease-out',
 				'pulse-subtle': 'pulse-subtle 2s ease-in-out infinite',
 				'float': 'float 3s ease-in-out infinite',
-				'typing': 'typing 1.5s steps(20, end)'
+				'typing': 'typing 1.5s steps(20, end)',
+				'rotate-cube': 'rotate-cube 10s linear infinite'
 			}
 		}
 	},
