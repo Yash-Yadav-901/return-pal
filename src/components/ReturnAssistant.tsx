@@ -3,7 +3,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import ChatMessage from './ChatMessage';
-import { generateId, getInitialMessage, getBotResponse, getTypingDelay } from '@/utils/chatbotUtils';
+import { generateId, getInitialMessage } from '@/utils/chatbotUtils';
+import { marked } from 'marked';
 
 interface Message {
   id: string;
@@ -36,14 +37,14 @@ const ReturnAssistant: React.FC = () => {
     }
   }, []);
 
-  // Scroll to bottom whenever messages change - but don't use smooth scrolling
+  // Scroll to bottom whenever messages change - don't use smooth scrolling
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'auto' });
     }
   }, [messages]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!input.trim() || isTyping) return;
@@ -69,11 +70,34 @@ const ReturnAssistant: React.FC = () => {
     setIsTyping(true);
     setMessages(prev => [...prev, typingIndicator]);
     
-    // Generate bot response after delay
-    const botResponse = getBotResponse(input);
-    const typingDelay = getTypingDelay(botResponse);
-    
-    setTimeout(() => {
+    // Call OpenRouter API
+    try {
+      const prompt = `You are a return and refund assistant. Only answer questions related to product returns and refunds. If a question is not related to product returns or refunds, respond with "I can only answer questions about product returns and refunds."\n\nUser: ${input}\nAssistant:`;
+      
+      const response = await fetch(
+        'https://openrouter.ai/api/v1/chat/completions',
+        {
+          method: 'POST',
+          headers: {
+            Authorization: 'Bearer <API Key from Open Router>',
+            'HTTP-Referer': 'https://www.sitename.com',
+            'X-Title': 'ReturnAssistantChatBot',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'deepseek/deepseek-r1:free',
+            messages: [{ role: 'user', content: prompt }],
+          }),
+        }
+      );
+      
+      const data = await response.json();
+      console.log('API response:', data);
+      
+      // Parse markdown from the response
+      const markdownText = data.choices?.[0]?.message?.content || 'Sorry, I could not process your request.';
+      const parsedText = marked.parse(markdownText);
+      
       // Remove typing indicator and add bot response
       setMessages(prev => {
         const filtered = prev.filter(msg => !msg.typing);
@@ -81,13 +105,28 @@ const ReturnAssistant: React.FC = () => {
           ...filtered, 
           {
             id: generateId(),
-            text: botResponse,
+            text: parsedText,
             isBot: true,
           }
         ];
       });
+    } catch (error) {
+      console.error('Error calling API:', error);
+      // Remove typing indicator and add error message
+      setMessages(prev => {
+        const filtered = prev.filter(msg => !msg.typing);
+        return [
+          ...filtered, 
+          {
+            id: generateId(),
+            text: `Error: ${error instanceof Error ? error.message : 'Unknown error occurred'}`,
+            isBot: true,
+          }
+        ];
+      });
+    } finally {
       setIsTyping(false);
-    }, typingDelay);
+    }
   };
 
   const handleReset = () => {

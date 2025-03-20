@@ -99,13 +99,17 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
       )}
       <div
         className={cn(
-          "p-4 max-w-[80%] whitespace-pre-wrap transform hover:translate-y-[-2px] transition-all duration-300",
+          "p-4 max-w-[80%] transform hover:translate-y-[-2px] transition-all duration-300",
           message.isBot 
             ? "neo-blur rounded-xl rounded-tl-none shadow-glow-xs" 
             : "bg-primary text-primary-foreground rounded-xl rounded-tr-none shadow-glow-xs"
         )}
       >
-        {message.text}
+        {message.isBot ? (
+          <div dangerouslySetInnerHTML={{ __html: message.text }} />
+        ) : (
+          message.text
+        )}
       </div>
     </div>
   );
