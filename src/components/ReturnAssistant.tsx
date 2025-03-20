@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import ChatMessage from './ChatMessage';
 import { generateId, getInitialMessage } from '@/utils/chatbotUtils';
 import { marked } from 'marked';
+import { toast } from "sonner";
 
 interface Message {
   id: string;
@@ -17,12 +18,20 @@ const ReturnAssistant: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [apiKey, setApiKey] = useState<string>('');
+  const [showApiKeyForm, setShowApiKeyForm] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   
-  // Your OpenRouter API Key
-  const OPENROUTER_API_KEY = "YOUR_API_KEY_HERE"; // Replace "YOUR_API_KEY_HERE" with your actual API key
+  // Load API key from localStorage on component mount
+  useEffect(() => {
+    const savedApiKey = localStorage.getItem('openrouter_api_key');
+    if (savedApiKey) {
+      setApiKey(savedApiKey);
+      setShowApiKeyForm(false);
+    }
+  }, []);
   
   // Initialize chat with welcome message
   useEffect(() => {
@@ -47,10 +56,34 @@ const ReturnAssistant: React.FC = () => {
     }
   }, [messages]);
 
+  const saveApiKey = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!apiKey.trim()) {
+      toast.error("Please enter an API key");
+      return;
+    }
+    
+    localStorage.setItem('openrouter_api_key', apiKey);
+    setShowApiKeyForm(false);
+    toast.success("API key saved successfully");
+  };
+
+  const resetApiKey = () => {
+    localStorage.removeItem('openrouter_api_key');
+    setApiKey('');
+    setShowApiKeyForm(true);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!input.trim() || isTyping) return;
+    
+    if (!apiKey) {
+      toast.error("Please enter your API key first");
+      setShowApiKeyForm(true);
+      return;
+    }
     
     // Add user message
     const userMessage: Message = {
@@ -82,7 +115,7 @@ const ReturnAssistant: React.FC = () => {
         {
           method: 'POST',
           headers: {
-            Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+            Authorization: `Bearer ${apiKey}`,
             'HTTP-Referer': 'https://www.sitename.com',
             'X-Title': 'ReturnAssistantChatBot',
             'Content-Type': 'application/json',
@@ -96,6 +129,10 @@ const ReturnAssistant: React.FC = () => {
       
       const data = await response.json();
       console.log('API response:', data);
+      
+      if (data.error) {
+        throw new Error(data.error.message || "API error occurred");
+      }
       
       // Parse markdown from the response
       const markdownText = data.choices?.[0]?.message?.content || 'Sorry, I could not process your request.';
@@ -152,49 +189,89 @@ const ReturnAssistant: React.FC = () => {
           <div className="w-2 h-2 bg-primary rounded-full mr-2 animate-pulse" />
           <h3 className="font-medium text-gradient">Return Assistant</h3>
         </div>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={handleReset}
-          className="text-xs text-primary/80 hover:text-primary"
-        >
-          New Chat
-        </Button>
-      </div>
-      
-      <div 
-        ref={chatContainerRef}
-        className="h-[400px] overflow-y-auto p-4 chat-container scrollbar-none"
-      >
-        {messages.map((message) => (
-          <ChatMessage 
-            key={message.id} 
-            message={message} 
-          />
-        ))}
-        <div ref={messagesEndRef} />
-      </div>
-      
-      <form onSubmit={handleSubmit} className="p-4 border-t border-white/10">
         <div className="flex gap-2">
-          <Input
-            ref={inputRef}
-            type="text"
-            placeholder="Type your message..."
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            disabled={isTyping}
-            className="flex-1 focus-visible:ring-primary/30 bg-white/5 border-white/10"
-          />
+          {!showApiKeyForm && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={resetApiKey}
+              className="text-xs text-destructive hover:text-destructive"
+            >
+              Reset API Key
+            </Button>
+          )}
           <Button 
-            type="submit" 
-            disabled={!input.trim() || isTyping}
-            className="transition-all duration-300 bg-primary hover:bg-primary/80 hover:shadow-glow-sm"
+            variant="ghost" 
+            size="sm" 
+            onClick={handleReset}
+            className="text-xs text-primary/80 hover:text-primary"
           >
-            Send
+            New Chat
           </Button>
         </div>
-      </form>
+      </div>
+      
+      {showApiKeyForm ? (
+        <div className="p-6 neo-blur">
+          <h4 className="text-lg font-medium mb-4">Enter your OpenRouter API Key</h4>
+          <form onSubmit={saveApiKey} className="space-y-4">
+            <div>
+              <Input
+                type="password"
+                placeholder="sk-or-..."
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+                className="focus-visible:ring-primary/30 bg-white/5 border-white/10"
+              />
+              <p className="text-xs text-muted-foreground mt-2">
+                Your API key is stored locally in your browser and never sent to our servers.
+              </p>
+            </div>
+            <Button 
+              type="submit" 
+              className="transition-all duration-300 bg-primary hover:bg-primary/80 hover:shadow-glow-sm"
+            >
+              Save API Key
+            </Button>
+          </form>
+        </div>
+      ) : (
+        <>
+          <div 
+            ref={chatContainerRef}
+            className="h-[400px] overflow-y-auto p-4 chat-container scrollbar-none"
+          >
+            {messages.map((message) => (
+              <ChatMessage 
+                key={message.id} 
+                message={message} 
+              />
+            ))}
+            <div ref={messagesEndRef} />
+          </div>
+          
+          <form onSubmit={handleSubmit} className="p-4 border-t border-white/10">
+            <div className="flex gap-2">
+              <Input
+                ref={inputRef}
+                type="text"
+                placeholder="Type your message..."
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                disabled={isTyping}
+                className="flex-1 focus-visible:ring-primary/30 bg-white/5 border-white/10"
+              />
+              <Button 
+                type="submit" 
+                disabled={!input.trim() || isTyping}
+                className="transition-all duration-300 bg-primary hover:bg-primary/80 hover:shadow-glow-sm"
+              >
+                Send
+              </Button>
+            </div>
+          </form>
+        </>
+      )}
     </div>
   );
 };
