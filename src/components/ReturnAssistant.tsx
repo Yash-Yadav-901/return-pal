@@ -6,6 +6,7 @@ import ChatMessage from './ChatMessage';
 import { generateId, getInitialMessage } from '@/utils/chatbotUtils';
 import { marked } from 'marked';
 import { toast } from "sonner";
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface Message {
   id: string;
@@ -22,7 +23,6 @@ const ReturnAssistant: React.FC = () => {
   const [showApiKeyForm, setShowApiKeyForm] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const chatContainerRef = useRef<HTMLDivElement>(null);
   
   // Load API key from localStorage on component mount
   useEffect(() => {
@@ -49,7 +49,7 @@ const ReturnAssistant: React.FC = () => {
     }
   }, []);
 
-  // Scroll to bottom whenever messages change - don't use smooth scrolling
+  // Scroll to bottom whenever messages change
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'auto' });
@@ -237,18 +237,17 @@ const ReturnAssistant: React.FC = () => {
         </div>
       ) : (
         <>
-          <div 
-            ref={chatContainerRef}
-            className="h-[400px] overflow-y-auto p-4 chat-container scrollbar-none"
-          >
-            {messages.map((message) => (
-              <ChatMessage 
-                key={message.id} 
-                message={message} 
-              />
-            ))}
-            <div ref={messagesEndRef} />
-          </div>
+          <ScrollArea className="h-[400px] p-4">
+            <div className="space-y-4 pb-4">
+              {messages.map((message) => (
+                <ChatMessage 
+                  key={message.id} 
+                  message={message} 
+                />
+              ))}
+              <div ref={messagesEndRef} />
+            </div>
+          </ScrollArea>
           
           <form onSubmit={handleSubmit} className="p-4 border-t border-white/10">
             <div className="flex gap-2">
