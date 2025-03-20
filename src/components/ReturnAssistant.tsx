@@ -20,6 +20,9 @@ const ReturnAssistant: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
+  
+  // Your OpenRouter API Key
+  const OPENROUTER_API_KEY = "YOUR_ACTUAL_API_KEY_HERE"; // Replace this with your actual API key
 
   // Initialize chat with welcome message
   useEffect(() => {
@@ -79,7 +82,7 @@ const ReturnAssistant: React.FC = () => {
         {
           method: 'POST',
           headers: {
-            Authorization: 'Bearer <API Key from Open Router>',
+            Authorization: `Bearer ${OPENROUTER_API_KEY}`,
             'HTTP-Referer': 'https://www.sitename.com',
             'X-Title': 'ReturnAssistantChatBot',
             'Content-Type': 'application/json',
