@@ -22,8 +22,8 @@ const ReturnAssistant: React.FC = () => {
   const chatContainerRef = useRef<HTMLDivElement>(null);
   
   // Your OpenRouter API Key
-  const OPENROUTER_API_KEY = "YOUR_ACTUAL_API_KEY_HERE"; // Replace this with your actual API key
-
+  const OPENROUTER_API_KEY = "YOUR_API_KEY_HERE"; // Replace "YOUR_API_KEY_HERE" with your actual API key
+  
   // Initialize chat with welcome message
   useEffect(() => {
     const initialMessage = {
