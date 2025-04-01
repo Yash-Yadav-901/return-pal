@@ -15,6 +15,11 @@ interface Message {
   typing?: boolean;
 }
 
+const STORAGE_KEYS = {
+  API_KEY: 'openrouter_api_key',
+  CHAT_HISTORY: 'return_assistant_chat_history'
+};
+
 const ReturnAssistant: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -24,30 +29,47 @@ const ReturnAssistant: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   
-  // Load API key from localStorage on component mount
+  // Load API key and chat history from localStorage on component mount
   useEffect(() => {
-    const savedApiKey = localStorage.getItem('openrouter_api_key');
+    const savedApiKey = localStorage.getItem(STORAGE_KEYS.API_KEY);
     if (savedApiKey) {
       setApiKey(savedApiKey);
       setShowApiKeyForm(false);
     }
-  }, []);
-  
-  // Initialize chat with welcome message
-  useEffect(() => {
+
+    // Load saved chat history
+    const savedChatHistory = localStorage.getItem(STORAGE_KEYS.CHAT_HISTORY);
+    if (savedChatHistory) {
+      try {
+        const parsedHistory = JSON.parse(savedChatHistory) as Message[];
+        if (Array.isArray(parsedHistory) && parsedHistory.length > 0) {
+          setMessages(parsedHistory);
+          return; // Skip adding initial message if we loaded history
+        }
+      } catch (error) {
+        console.error('Error parsing chat history:', error);
+        // If there's an error parsing, we'll fall through to the default message
+      }
+    }
+    
+    // Initialize with welcome message only if no history was loaded
     const initialMessage = {
       id: generateId(),
       text: getInitialMessage(),
       isBot: true,
     };
-    
     setMessages([initialMessage]);
-    
-    // Focus input field
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
   }, []);
+
+  // Save chat history to localStorage whenever messages change
+  useEffect(() => {
+    // Don't save if we only have the initial message
+    if (messages.length > 0) {
+      // Filter out typing indicators before saving
+      const historyToSave = messages.filter(msg => !msg.typing);
+      localStorage.setItem(STORAGE_KEYS.CHAT_HISTORY, JSON.stringify(historyToSave));
+    }
+  }, [messages]);
 
   // Scroll to bottom whenever messages change
   useEffect(() => {
@@ -63,13 +85,13 @@ const ReturnAssistant: React.FC = () => {
       return;
     }
     
-    localStorage.setItem('openrouter_api_key', apiKey);
+    localStorage.setItem(STORAGE_KEYS.API_KEY, apiKey);
     setShowApiKeyForm(false);
     toast.success("API key saved successfully");
   };
 
   const resetApiKey = () => {
-    localStorage.removeItem('openrouter_api_key');
+    localStorage.removeItem(STORAGE_KEYS.API_KEY);
     setApiKey('');
     setShowApiKeyForm(true);
   };
@@ -106,9 +128,23 @@ const ReturnAssistant: React.FC = () => {
     setIsTyping(true);
     setMessages(prev => [...prev, typingIndicator]);
     
+    // Build conversation history for context
+    const conversationHistory = messages
+      .filter(msg => !msg.typing)
+      .map(msg => ({
+        role: msg.isBot ? 'assistant' : 'user',
+        content: msg.text
+      }));
+    
     // Call OpenRouter API
     try {
-      const prompt = `You are a return and refund assistant. Only answer questions related to product returns and refunds. If a question is not related to product returns or refunds, respond with "I can only answer questions about product returns and refunds."\n\nUser: ${input}\nAssistant:`;
+      const systemPrompt = "You are a return and refund assistant. You help customers with product returns and refunds. You should remember details that the customer provides about their order, such as order numbers or product details. If a question is not related to product returns or refunds, respond with 'I can only answer questions about product returns and refunds.'";
+      
+      const apiMessages = [
+        { role: 'system', content: systemPrompt },
+        ...conversationHistory,
+        { role: 'user', content: input }
+      ];
       
       const response = await fetch(
         'https://openrouter.ai/api/v1/chat/completions',
@@ -122,7 +158,7 @@ const ReturnAssistant: React.FC = () => {
           },
           body: JSON.stringify({
             model: 'deepseek/deepseek-r1:free',
-            messages: [{ role: 'user', content: prompt }],
+            messages: apiMessages,
           }),
         }
       );
@@ -170,6 +206,10 @@ const ReturnAssistant: React.FC = () => {
   };
 
   const handleReset = () => {
+    // Clear chat history from localStorage
+    localStorage.removeItem(STORAGE_KEYS.CHAT_HISTORY);
+    
+    // Reset messages with initial welcome
     setMessages([
       {
         id: generateId(),
