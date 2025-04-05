@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,7 +28,6 @@ const ReturnAssistant: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   
-  // Load API key and chat history from localStorage on component mount
   useEffect(() => {
     const savedApiKey = localStorage.getItem(STORAGE_KEYS.API_KEY);
     if (savedApiKey) {
@@ -37,7 +35,6 @@ const ReturnAssistant: React.FC = () => {
       setShowApiKeyForm(false);
     }
 
-    // Load saved chat history
     const savedChatHistory = localStorage.getItem(STORAGE_KEYS.CHAT_HISTORY);
     if (savedChatHistory) {
       try {
@@ -48,11 +45,9 @@ const ReturnAssistant: React.FC = () => {
         }
       } catch (error) {
         console.error('Error parsing chat history:', error);
-        // If there's an error parsing, we'll fall through to the default message
       }
     }
     
-    // Initialize with welcome message only if no history was loaded
     const initialMessage = {
       id: generateId(),
       text: getInitialMessage(),
@@ -61,17 +56,13 @@ const ReturnAssistant: React.FC = () => {
     setMessages([initialMessage]);
   }, []);
 
-  // Save chat history to localStorage whenever messages change
   useEffect(() => {
-    // Don't save if we only have the initial message
     if (messages.length > 0) {
-      // Filter out typing indicators before saving
       const historyToSave = messages.filter(msg => !msg.typing);
       localStorage.setItem(STORAGE_KEYS.CHAT_HISTORY, JSON.stringify(historyToSave));
     }
   }, [messages]);
 
-  // Scroll to bottom whenever messages change
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'auto' });
@@ -107,7 +98,6 @@ const ReturnAssistant: React.FC = () => {
       return;
     }
     
-    // Add user message
     const userMessage: Message = {
       id: generateId(),
       text: input,
@@ -117,7 +107,6 @@ const ReturnAssistant: React.FC = () => {
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     
-    // Add typing indicator
     const typingIndicator: Message = {
       id: generateId(),
       text: '',
@@ -128,7 +117,6 @@ const ReturnAssistant: React.FC = () => {
     setIsTyping(true);
     setMessages(prev => [...prev, typingIndicator]);
     
-    // Build conversation history for context
     const conversationHistory = messages
       .filter(msg => !msg.typing)
       .map(msg => ({
@@ -136,7 +124,6 @@ const ReturnAssistant: React.FC = () => {
         content: msg.text
       }));
     
-    // Call OpenRouter API
     try {
       const systemPrompt = "You are a return and refund assistant. You help customers with product returns and refunds. You should remember details that the customer provides about their order, such as order numbers or product details. If a question is not related to product returns or refunds, respond with 'I can only answer questions about product returns and refunds.'";
       
@@ -170,11 +157,9 @@ const ReturnAssistant: React.FC = () => {
         throw new Error(data.error.message || "API error occurred");
       }
       
-      // Parse markdown from the response
       const markdownText = data.choices?.[0]?.message?.content || 'Sorry, I could not process your request.';
       const parsedText = marked.parse(markdownText);
       
-      // Remove typing indicator and add bot response
       setMessages(prev => {
         const filtered = prev.filter(msg => !msg.typing);
         return [
@@ -188,7 +173,6 @@ const ReturnAssistant: React.FC = () => {
       });
     } catch (error) {
       console.error('Error calling API:', error);
-      // Remove typing indicator and add error message
       setMessages(prev => {
         const filtered = prev.filter(msg => !msg.typing);
         return [
@@ -206,10 +190,7 @@ const ReturnAssistant: React.FC = () => {
   };
 
   const handleReset = () => {
-    // Clear chat history from localStorage
     localStorage.removeItem(STORAGE_KEYS.CHAT_HISTORY);
-    
-    // Reset messages with initial welcome
     setMessages([
       {
         id: generateId(),
@@ -229,7 +210,10 @@ const ReturnAssistant: React.FC = () => {
           <div className="w-2 h-2 bg-primary rounded-full mr-2 animate-pulse" />
           <h3 className="font-medium text-gradient">Return Assistant</h3>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+          <div className="text-xs text-muted-foreground border border-white/10 px-2 py-1 rounded-md mr-1">
+            Registration #: 12309075
+          </div>
           {!showApiKeyForm && (
             <Button 
               variant="outline" 
