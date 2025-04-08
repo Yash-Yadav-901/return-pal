@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,12 +20,15 @@ const STORAGE_KEYS = {
   CHAT_HISTORY: 'return_assistant_chat_history'
 };
 
+// Permanently stored API key for teacher demonstration
+const DEFAULT_API_KEY = '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';
+
 const ReturnAssistant: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [apiKey, setApiKey] = useState<string>('');
-  const [showApiKeyForm, setShowApiKeyForm] = useState(true);
+  const [apiKey, setApiKey] = useState<string>(DEFAULT_API_KEY);
+  const [showApiKeyForm, setShowApiKeyForm] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   
@@ -32,7 +36,6 @@ const ReturnAssistant: React.FC = () => {
     const savedApiKey = localStorage.getItem(STORAGE_KEYS.API_KEY);
     if (savedApiKey) {
       setApiKey(savedApiKey);
-      setShowApiKeyForm(false);
     }
 
     const savedChatHistory = localStorage.getItem(STORAGE_KEYS.CHAT_HISTORY);
@@ -82,8 +85,13 @@ const ReturnAssistant: React.FC = () => {
   };
 
   const resetApiKey = () => {
+    setApiKey(DEFAULT_API_KEY);
     localStorage.removeItem(STORAGE_KEYS.API_KEY);
-    setApiKey('');
+    setShowApiKeyForm(false);
+    toast.success("Reset to default API key");
+  };
+
+  const changeApiKey = () => {
     setShowApiKeyForm(true);
   };
 
@@ -93,7 +101,7 @@ const ReturnAssistant: React.FC = () => {
     if (!input.trim() || isTyping) return;
     
     if (!apiKey) {
-      toast.error("Please enter your API key first");
+      toast.error("API key is missing");
       setShowApiKeyForm(true);
       return;
     }
@@ -218,10 +226,10 @@ const ReturnAssistant: React.FC = () => {
             <Button 
               variant="outline" 
               size="sm" 
-              onClick={resetApiKey}
-              className="text-xs text-destructive hover:text-destructive"
+              onClick={changeApiKey}
+              className="text-xs text-blue-400 hover:text-blue-300"
             >
-              Reset API Key
+              Change API Key
             </Button>
           )}
           <Button 
@@ -251,12 +259,22 @@ const ReturnAssistant: React.FC = () => {
                 Your API key is stored locally in your browser and never sent to our servers.
               </p>
             </div>
-            <Button 
-              type="submit" 
-              className="transition-all duration-300 bg-primary hover:bg-primary/80 hover:shadow-glow-sm"
-            >
-              Save API Key
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                type="submit" 
+                className="transition-all duration-300 bg-primary hover:bg-primary/80 hover:shadow-glow-sm"
+              >
+                Save API Key
+              </Button>
+              <Button 
+                type="button"
+                variant="outline"
+                onClick={resetApiKey} 
+                className="transition-all duration-300"
+              >
+                Use Default Key
+              </Button>
+            </div>
           </form>
         </div>
       ) : (
