@@ -133,7 +133,7 @@ const ReturnAssistant: React.FC = () => {
       }));
     
     try {
-      const systemPrompt = "You are a return and refund assistant. You help customers with product returns and refunds. You should remember details that the customer provides about their order, such as order numbers or product details. If a question is not related to product returns or refunds, respond with 'I can only answer questions about product returns and refunds.'";
+      const systemPrompt = "You are a return and refund assistant. You help customers with product returns and refunds. You should remember details that the customer provides about their order, such as order numbers or product details. If a question is not related to product returns or refunds, respond with 'I can only answer questions about product returns and refunds.' IMPORTANT: ONLY RESPOND WITH THE FINAL ANSWER. DO NOT INCLUDE ANY THINKING, REASONING, OR EXPLANATION ABOUT HOW YOU'RE GENERATING THE RESPONSE.";
       
       const apiMessages = [
         { role: 'system', content: systemPrompt },
@@ -154,6 +154,8 @@ const ReturnAssistant: React.FC = () => {
           body: JSON.stringify({
             model: 'deepseek/deepseek-r1:free',
             messages: apiMessages,
+            temperature: 0.7,
+            max_tokens: 800,
           }),
         }
       );
