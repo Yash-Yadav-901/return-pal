@@ -12,6 +12,9 @@ const Preview: React.FC = () => {
           <p className="text-muted-foreground">
             Use our AI assistant to manage your returns quickly and easily
           </p>
+          <p className="text-muted-foreground mt-2 text-blue-400">
+            Made by Reg.No.: 12309075
+          </p>
         </div>
         
         <ReturnAssistant />
