@@ -92,10 +92,9 @@ const Index: React.FC = () => {
         
         <div className="mb-24">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4 text-gradient-primary text-blue-400">Made by Reg.No.:- 12309075 
+            <h2 className="text-3xl font-bold mb-4 text-gradient-primary text-blue-400">Made by Reg.No.:- 12309075   
 
-
- What Our Customers Say</h2>
+          </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
               Thousands of customers love how easy it is to process returns with ReturnPal
             </p>
