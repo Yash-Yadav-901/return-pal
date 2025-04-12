@@ -20,7 +20,7 @@ const STORAGE_KEYS = {
 };
 
 // Permanently stored API key for teacher demonstration
-const DEFAULT_API_KEY = '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';
+const DEFAULT_API_KEY = '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';
 
 const ReturnAssistant: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
