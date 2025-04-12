@@ -16,8 +16,8 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
   return (
     <div className="p-4 border-b border-white/10 flex items-center justify-between">
       <div className="flex items-center">
-        <div className="w-2 h-2 bg-primary rounded-full mr-2 animate-pulse" />
-        <h3 className="font-medium text-gradient">Return Assistant</h3>
+        <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse" />
+        <h3 className="font-medium text-gradient">Return Assistant (Gemini)</h3>
       </div>
       <div className="flex gap-2 items-center">
         <div className="text-xs text-muted-foreground border border-white/10 px-2 py-1 rounded-md mr-1">

@@ -23,30 +23,33 @@ const ApiKeyForm: React.FC<ApiKeyFormProps> = ({ initialApiKey, onSave, onCancel
     
     localStorage.setItem(STORAGE_KEYS.API_KEY, apiKey);
     onSave(apiKey);
-    toast.success("API key saved successfully");
   };
 
   const resetApiKey = () => {
-    setApiKey(DEFAULT_API_KEY);
-    localStorage.removeItem(STORAGE_KEYS.API_KEY);
-    onSave(DEFAULT_API_KEY);
-    toast.success("Reset to default API key");
+    if (DEFAULT_API_KEY) {
+      setApiKey(DEFAULT_API_KEY);
+      localStorage.removeItem(STORAGE_KEYS.API_KEY);
+      onSave(DEFAULT_API_KEY);
+      toast.success("Reset to default API key");
+    } else {
+      toast.error("No default API key available");
+    }
   };
 
   return (
     <div className="p-6 neo-blur">
-      <h4 className="text-lg font-medium mb-4">Enter your OpenRouter API Key</h4>
+      <h4 className="text-lg font-medium mb-4">Enter your Gemini API Key</h4>
       <form onSubmit={saveApiKey} className="space-y-4">
         <div>
           <Input
             type="password"
-            placeholder="sk-or-..."
+            placeholder="AIzaSyA..."
             value={apiKey}
             onChange={(e) => setApiKey(e.target.value)}
             className="focus-visible:ring-primary/30 bg-white/5 border-white/10"
           />
           <p className="text-xs text-muted-foreground mt-2">
-            Your API key is stored locally in your browser and never sent to our servers.
+            Get your API key from <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Google AI Studio</a>. Your API key is stored locally in your browser.
           </p>
         </div>
         <div className="flex gap-2">
@@ -56,14 +59,16 @@ const ApiKeyForm: React.FC<ApiKeyFormProps> = ({ initialApiKey, onSave, onCancel
           >
             Save API Key
           </Button>
-          <Button 
-            type="button"
-            variant="outline"
-            onClick={resetApiKey} 
-            className="transition-all duration-300"
-          >
-            Use Default Key
-          </Button>
+          {DEFAULT_API_KEY && (
+            <Button 
+              type="button"
+              variant="outline"
+              onClick={resetApiKey} 
+              className="transition-all duration-300"
+            >
+              Use Default Key
+            </Button>
+          )}
         </div>
       </form>
     </div>

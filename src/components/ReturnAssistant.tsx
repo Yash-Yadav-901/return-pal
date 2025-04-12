@@ -30,6 +30,9 @@ const ReturnAssistant: React.FC = () => {
     const savedApiKey = localStorage.getItem(STORAGE_KEYS.API_KEY);
     if (savedApiKey) {
       setApiKey(savedApiKey);
+    } else {
+      // If no API key is found, show the API key form immediately
+      setShowApiKeyForm(true);
     }
 
     // Load chat history or set initial message
@@ -56,6 +59,7 @@ const ReturnAssistant: React.FC = () => {
   const handleSaveApiKey = (newApiKey: string) => {
     setApiKey(newApiKey);
     setShowApiKeyForm(false);
+    toast.success("Gemini API key saved successfully");
   };
 
   const changeApiKey = () => {
@@ -68,7 +72,7 @@ const ReturnAssistant: React.FC = () => {
     if (!input.trim() || isTyping) return;
     
     if (!apiKey) {
-      toast.error("API key is missing");
+      toast.error("Gemini API key is missing");
       setShowApiKeyForm(true);
       return;
     }
