@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -141,12 +140,14 @@ const ReturnAssistant: React.FC = () => {
         { role: 'user', content: input }
       ];
       
+      console.log('Sending request with API key:', apiKey);
+      
       const response = await fetch(
         'https://openrouter.ai/api/v1/chat/completions',
         {
           method: 'POST',
           headers: {
-            Authorization: `Bearer ${apiKey}`,
+            'Authorization': `Bearer ${apiKey}`,
             'HTTP-Referer': 'https://www.sitename.com',
             'X-Title': 'ReturnAssistantChatBot',
             'Content-Type': 'application/json',
@@ -160,11 +161,13 @@ const ReturnAssistant: React.FC = () => {
         }
       );
       
+      console.log('Response status:', response.status);
+      
       const data = await response.json();
       console.log('API response:', data);
       
-      if (data.error) {
-        throw new Error(data.error.message || "API error occurred");
+      if (!response.ok) {
+        throw new Error(data.error?.message || `API error: ${response.status}`);
       }
       
       const markdownText = data.choices?.[0]?.message?.content || 'Sorry, I could not process your request.';
@@ -194,6 +197,15 @@ const ReturnAssistant: React.FC = () => {
           }
         ];
       });
+      
+      toast.error(`API Error: ${error instanceof Error ? error.message : 'Unknown error occurred'}`);
+      
+      if (error instanceof Error && 
+          (error.message.includes('auth') || 
+           error.message.includes('credential') || 
+           error.message.includes('401'))) {
+        setShowApiKeyForm(true);
+      }
     } finally {
       setIsTyping(false);
     }
