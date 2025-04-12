@@ -140,14 +140,14 @@ const ReturnAssistant: React.FC = () => {
         { role: 'user', content: input }
       ];
       
-      console.log('Sending request with API key:', apiKey);
+      console.log('Sending request with API key:', apiKey.substring(0, 10) + '...');
       
       const response = await fetch(
         'https://openrouter.ai/api/v1/chat/completions',
         {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${apiKey}`,
+            'Authorization': `Bearer ${apiKey.trim()}`,
             'HTTP-Referer': 'https://www.sitename.com',
             'X-Title': 'ReturnAssistantChatBot',
             'Content-Type': 'application/json',
@@ -167,7 +167,24 @@ const ReturnAssistant: React.FC = () => {
       console.log('API response:', data);
       
       if (!response.ok) {
-        throw new Error(data.error?.message || `API error: ${response.status}`);
+        let errorMessage = 'API Error';
+        if (data.error && data.error.message) {
+          errorMessage = data.error.message;
+        } else if (data.error) {
+          errorMessage = JSON.stringify(data.error);
+        } else if (data.message) {
+          errorMessage = data.message;
+        }
+        
+        if (errorMessage.includes('auth') || 
+            errorMessage.includes('credentials') || 
+            errorMessage.includes('API key') ||
+            response.status === 401 || 
+            response.status === 403) {
+          throw new Error(`Authentication error: ${errorMessage}`);
+        } else {
+          throw new Error(errorMessage);
+        }
       }
       
       const markdownText = data.choices?.[0]?.message?.content || 'Sorry, I could not process your request.';
@@ -198,12 +215,15 @@ const ReturnAssistant: React.FC = () => {
         ];
       });
       
-      toast.error(`API Error: ${error instanceof Error ? error.message : 'Unknown error occurred'}`);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      toast.error(`API Error: ${errorMessage}`);
       
       if (error instanceof Error && 
-          (error.message.includes('auth') || 
-           error.message.includes('credential') || 
-           error.message.includes('401'))) {
+         (errorMessage.toLowerCase().includes('auth') || 
+          errorMessage.toLowerCase().includes('credential') || 
+          errorMessage.toLowerCase().includes('api key') ||
+          errorMessage.includes('401') || 
+          errorMessage.includes('403'))) {
         setShowApiKeyForm(true);
       }
     } finally {
