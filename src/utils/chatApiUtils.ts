@@ -61,8 +61,8 @@ export const fetchChatResponse = async (
     // Add the rest of the conversation
     for (const msg of conversationHistory) {
       geminiMessages.push({
-        role: msg.role === 'assistant' ? 'model' : 'user',
-        parts: [{ text: msg.content }]
+        role: msg.role === 'user' ? 'user' : 'model',
+        parts: [{ text: msg.parts[0].text }]
       });
     }
     
@@ -167,3 +167,4 @@ export const convertToApiMessages = (messages: Message[]): ApiMessage[] => {
       parts: [{ text: msg.text }]
     }));
 };
+
