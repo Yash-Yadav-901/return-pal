@@ -1,4 +1,3 @@
-
 import { toast } from "sonner";
 import { marked } from 'marked';
 import { generateId } from './chatbotUtils';
@@ -20,8 +19,8 @@ export const STORAGE_KEYS = {
   CHAT_HISTORY: 'return_assistant_chat_history'
 };
 
-// Default API key - users will need to provide their own Gemini API key
-export const DEFAULT_API_KEY = '';
+// Default API key - users will not need to provide their own Gemini API key
+export const DEFAULT_API_KEY = 'AIzaSyCoJGMoaixTQxEMwcWWITsOQ0QE8oWJyXo';
 
 export const getSystemPrompt = (): string => {
   return "You are a return and refund assistant. You help customers with product returns and refunds. You should remember details that the customer provides about their order, such as order numbers or product details. If a question is not related to product returns or refunds, respond with 'I can only answer questions about product returns and refunds.' IMPORTANT: ONLY RESPOND WITH THE FINAL ANSWER. DO NOT INCLUDE ANY THINKING, REASONING, OR EXPLANATION ABOUT HOW YOU'RE GENERATING THE RESPONSE.";
@@ -167,4 +166,3 @@ export const convertToApiMessages = (messages: Message[]): ApiMessage[] => {
       parts: [{ text: msg.text }]
     }));
 };
-
